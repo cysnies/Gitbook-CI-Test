@@ -47,7 +47,7 @@ jobs:
     needs: build-gitbook
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: gitbook-build
           path: ./_book
