@@ -12,10 +12,6 @@ permissions:
   id-token: write 
   packages: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
   build-gitbook:
     runs-on: ubuntu-latest
