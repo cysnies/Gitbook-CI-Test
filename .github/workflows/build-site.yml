@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build-gitbook:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-gitbook
     steps:
       - name: Download artifact
@@ -62,7 +62,7 @@ jobs:
         uses: actions/deploy-pages@v4
 
   build-and-push-docker:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-gitbook
     steps:
       - name: Checkout code
