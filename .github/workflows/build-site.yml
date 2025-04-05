@@ -1,0 +1,94 @@
+name: Build Gitbook Site
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-gitbook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+      - name: Install Gitbook
+        run: npm install -g gitbook-cli
+
+      - name: Build Gitbook
+        run: gitbook build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gitbook-build
+          path: ./_book
+
+  deploy-to-gh-pages:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-gitbook
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: gitbook-build
+          path: ./_book
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_book
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  build-and-push-docker:
+    runs-on: ubuntu-latest
+    needs: build-gitbook
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: gitbook-build
+          path: ./_book
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest
+    
