@@ -93,4 +93,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ghcr.io/gitbook-cysnies:latest
+          tags: ghcr.io/${{ github.repository_owner }}/gitbook-test:latest
